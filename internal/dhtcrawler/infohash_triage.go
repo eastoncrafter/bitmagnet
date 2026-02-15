@@ -42,11 +42,11 @@ func (c *crawler) runInfoHashTriage(ctx context.Context) {
 				break
 			}
 
-			filteredHashMap := make(map[protocol.ID]struct{}, len(allHashes))
+			hashMap := make(map[protocol.ID]struct{}, len(allHashes))
 			valuers := make([]driver.Valuer, 0, len(allHashes))
 
 			for _, h := range allHashes {
-				filteredHashMap[h] = struct{}{}
+				hashMap[h] = struct{}{}
 
 				valuers = append(valuers, h)
 			}
@@ -75,7 +75,7 @@ func (c *crawler) runInfoHashTriage(ctx context.Context) {
 				foundTorrents[t.InfoHash] = *t
 			}
 
-			for h := range filteredHashMap {
+			for h := range hashMap {
 				r := reqMap[h]
 				if t, ok := foundTorrents[r.infoHash]; !ok ||
 					t.FilesStatus == model.FilesStatusNoInfo ||
