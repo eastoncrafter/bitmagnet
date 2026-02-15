@@ -2,12 +2,10 @@ package processor
 
 import (
 	"context"
-	"database/sql/driver"
 
 	"github.com/bitmagnet-io/bitmagnet/internal/database/dao"
 	"github.com/bitmagnet-io/bitmagnet/internal/model"
 	"github.com/bitmagnet-io/bitmagnet/internal/protocol"
-	"github.com/bitmagnet-io/bitmagnet/internal/slice"
 	"gorm.io/gorm/clause"
 )
 
@@ -50,11 +48,7 @@ func (c processor) persist(ctx context.Context, payload persistPayload) error {
 		}
 	}
 
-	if len(payload.deleteInfoHashes) > 0 {
-		if blockErr := c.blockingManager.Block(ctx, payload.deleteInfoHashes, false); blockErr != nil {
-			return blockErr
-		}
-	}
+	// Removed torrent deletion logic - no longer blocking or deleting torrents
 
 	return c.dao.Transaction(func(tx *dao.Query) error {
 		if len(contentsPtr) > 0 {
@@ -94,17 +88,7 @@ func (c processor) persist(ctx context.Context, payload persistPayload) error {
 			}
 		}
 
-		if len(payload.deleteInfoHashes) > 0 {
-			valuers := slice.Map(payload.deleteInfoHashes, func(infoHash protocol.ID) driver.Valuer {
-				return infoHash
-			})
-
-			if _, deleteErr := tx.Torrent.WithContext(ctx).Where(
-				c.dao.Torrent.InfoHash.In(valuers...),
-			).Delete(); deleteErr != nil {
-				return deleteErr
-			}
-		}
+		// Removed torrent deletion logic - no longer deleting torrents from database
 
 		return nil
 	})

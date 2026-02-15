@@ -37,20 +37,15 @@ func (c *crawler) runInfoHashTriage(ctx context.Context) {
 				reqMap[r.infoHash] = r
 			}
 
-			filteredHashes, filterErr := c.blockingManager.Filter(ctx, allHashes)
-			if filterErr != nil {
-				c.logger.Errorf("failed to filter infohashes: %s", filterErr.Error())
+			// Removed blocking filter - save all torrents regardless of content
+			if len(allHashes) == 0 {
 				break
 			}
 
-			if len(filteredHashes) == 0 {
-				break
-			}
+			filteredHashMap := make(map[protocol.ID]struct{}, len(allHashes))
+			valuers := make([]driver.Valuer, 0, len(allHashes))
 
-			filteredHashMap := make(map[protocol.ID]struct{}, len(filteredHashes))
-			valuers := make([]driver.Valuer, 0, len(filteredHashes))
-
-			for _, h := range filteredHashes {
+			for _, h := range allHashes {
 				filteredHashMap[h] = struct{}{}
 
 				valuers = append(valuers, h)

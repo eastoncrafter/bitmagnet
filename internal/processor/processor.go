@@ -131,12 +131,9 @@ func (c processor) Process(ctx context.Context, params MessageParams) error {
 			defer mtx.Unlock()
 
 			if classifyErr != nil {
-				if errors.Is(classifyErr, classification.ErrDeleteTorrent) {
-					infoHashesToDelete = append(infoHashesToDelete, torrent.InfoHash)
-				} else {
-					failedHashes = append(failedHashes, torrent.InfoHash)
-					errs = append(errs, classifyErr)
-				}
+				// Removed deletion logic - treat all errors as failures, don't delete torrents
+				failedHashes = append(failedHashes, torrent.InfoHash)
+				errs = append(errs, classifyErr)
 			} else {
 				torrentContent := newTorrentContent(torrent, cl)
 
